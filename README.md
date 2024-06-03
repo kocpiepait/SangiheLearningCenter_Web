@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
@@ -66,10 +67,15 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 =======
+=======
+>>>>>>> 22ae0ab5f071032db2ea39cd4f5ee670ba8fa089
 <h1 align="center">SangiheLearningCenter_Web<h1>
 <p align="center">Website Sistem Informasi Sangihe Learning Center</p>
 <img src="https://sangihelearningcenter.com/wp-content/uploads/2024/01/logo-e1705190949144-1536x468.png">
 <p align="center">Website Masi Dalam Tahapan Pengembagan<p>
 <h2 align="center">🖥️Tech & Tools :</h2>
 <p align="center"> <img src="https://user-images.githubusercontent.com/25181517/183897015-94a058a6-b86e-4e42-a37f-bf92061753e5.png" alt="React"  width="40" height="40" /> <img src="https://user-images.githubusercontent.com/25181517/183898054-b3d693d4-dafb-4808-a509-bab54cf5de34.png" alt="Boostrap" width="40" height="40" > <img src="https://user-images.githubusercontent.com/25181517/202896760-337261ed-ee92-4979-84c4-d4b829c7355d.png" width="40" height="40" > <img src="https://user-images.githubusercontent.com/25181517/189715289-df3ee512-6eca-463f-a0f4-c10d94a06b2f.png" width="40" height="40"> <img src="https://user-images.githubusercontent.com/25181517/117447155-6a868a00-af3d-11eb-9cfe-245df15c9f3f.png" width="40" height="40"> <img src="https://user-images.githubusercontent.com/25181517/183570228-6a040b9f-3ddf-47a2-a201-743121dac664.png" width="40" height="40" > <img src="https://github.com/marwin1991/profile-technology-icons/assets/25181517/afcf1c98-544e-41fb-bf44-edba5e62809a" width="40" height="40">
+<<<<<<< HEAD
+>>>>>>> 22ae0ab5f071032db2ea39cd4f5ee670ba8fa089
+=======
 >>>>>>> 22ae0ab5f071032db2ea39cd4f5ee670ba8fa089
