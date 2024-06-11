@@ -22,11 +22,6 @@ class Program extends Model
     {
         return $this->hasMany(Peserta::class, 'id_program');
     }
-
-    public function processings()
-    {
-        return $this->hasMany(Processing::class, 'id_program');
-    }
     protected $table = 'program';
     public $timestamps = false;
 }

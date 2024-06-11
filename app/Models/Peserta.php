@@ -17,11 +17,6 @@ class Peserta extends Model
     {
         return $this->belongsTo(Program::class, 'id_program');
     }
-
-    public function processings()
-    {
-        return $this->hasMany(Processing::class, 'id_peserta');
-    }
     protected $table = 'peserta';
     public $timestamps = false;
 }

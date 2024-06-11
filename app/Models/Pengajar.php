@@ -17,11 +17,6 @@ class Pengajar extends Model
     {
         return $this->belongsTo(Program::class, 'id_program');
     }
-
-    public function processings()
-    {
-        return $this->hasMany(Processing::class, 'id_pengajar');
-    }
     protected $table = 'pengajar';
     public $timestamps = false;
 }

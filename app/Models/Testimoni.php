@@ -12,6 +12,7 @@ class Testimoni extends Model
         'isi_testimoni',
         'nama_testimoni',
         'status_testimoni',
+        'gambar_testimoni',
     ];
 
     protected $table = 'testimoni';

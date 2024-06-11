@@ -17,4 +17,8 @@ class Berita extends Model
     ];
     protected $table = 'berita';
     public $timestamps = false;
+    
+    // protected $casts = [
+    //     'media' => 'binary',
+    // ];
 }

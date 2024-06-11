@@ -14,6 +14,7 @@ class PengajarController extends Controller
     {
         $pengajars = Pengajar::with('program')->get();
         return Inertia::render('Pengajar/Index', ['pengajars' => $pengajars]);
+        // return Inertia::render('Dashboard', ['pengajars' => $pengajars]);
     }
 
     public function create()
