@@ -8,6 +8,9 @@ use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\PengajarController;
 use App\Http\Controllers\PesertaController;
 use App\Http\Controllers\DashboardController;
+use App\Models\Berita;
+use App\Models\Pengajar;
+use App\Models\Program;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -43,14 +46,34 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
 
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
+    $programs = Program::all(); 
+    $pengajar = Pengajar::all(); 
+    $beritas = Berita::all(); 
+
+    return Inertia::render('Beranda', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
+        'programs' => $programs,
+        'pengajars' => $pengajar,
+        'beritas' => $beritas
     ]);
 });
 
+Route::get('/Tentang', function () {
+    $pengajar = Pengajar::all(); 
+    return Inertia::render ('HalamanTentang', [
+        'pengajars' => $pengajar    
+    ]);
+});
+
+Route::get('/HalamanProgram', function () {
+    $programs = Program::all(); 
+    return Inertia::render ('HalamanProgram', [
+        'program' => $programs    
+    ]);
+});
 // Route::middleware(['auth', 'verified'])->group(function () {
 //     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 // });
