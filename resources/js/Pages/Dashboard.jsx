@@ -321,11 +321,7 @@
 //     );
 // }
 
-<<<<<<< HEAD
 // Dashboard.js
-=======
-// Dashboard.js;
->>>>>>> 2a41908 (database seeder)
 
 import React, { useState } from "react";
 import { Head } from "@inertiajs/react";
@@ -506,8 +502,6 @@ export default function Dashboard({
         </AuthenticatedLayout>
     );
 }
-<<<<<<< HEAD
-=======
 
 // import React, { useState } from "react";
 // import { Head, Inertia } from "@inertiajs/react";
@@ -631,4 +625,3 @@ export default function Dashboard({
 //         </AuthenticatedLayout>
 //     );
 // }
->>>>>>> 2a41908 (database seeder)

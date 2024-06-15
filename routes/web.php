@@ -8,12 +8,6 @@ use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\PengajarController;
 use App\Http\Controllers\PesertaController;
 use App\Http\Controllers\DashboardController;
-<<<<<<< HEAD
-use App\Models\Berita;
-use App\Models\Pengajar;
-use App\Models\Program;
-=======
->>>>>>> 2a41908 (database seeder)
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -38,8 +32,6 @@ Route::resource('pengajar', PengajarController::class);
 Route::resource('peserta', PesertaController::class);
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
-<<<<<<< HEAD
-=======
 
 // Route::middleware(['auth', 'verified'])->group(function () {
 // Route::get('/dashboard', [ProgramController::class, 'index'])->name('dashboard');
@@ -61,7 +53,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
 // });
 // Route::resource('program', ProgramController::class);
 
->>>>>>> 2a41908 (database seeder)
+
 // // Rute untuk dashboard admin
 // Route::middleware(['auth', 'admin'])->group(function () {
 //     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -73,44 +65,15 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
 
 
 Route::get('/', function () {
-<<<<<<< HEAD
-    $programs = Program::all(); 
-    $pengajar = Pengajar::all(); 
-    $beritas = Berita::all(); 
-
-    return Inertia::render('Beranda', [
-=======
     return Inertia::render('Welcome', [
->>>>>>> 2a41908 (database seeder)
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
-<<<<<<< HEAD
-        'programs' => $programs,
-        'pengajars' => $pengajar,
-        'beritas' => $beritas
     ]);
 });
 
-Route::get('/Tentang', function () {
-    $pengajar = Pengajar::all(); 
-    return Inertia::render ('HalamanTentang', [
-        'pengajars' => $pengajar    
-    ]);
-});
 
-Route::get('/HalamanProgram', function () {
-    $programs = Program::all(); 
-    return Inertia::render ('HalamanProgram', [
-        'program' => $programs    
-    ]);
-});
-=======
-    ]);
-});
-
->>>>>>> 2a41908 (database seeder)
 // Route::middleware(['auth', 'verified'])->group(function () {
 //     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 // });

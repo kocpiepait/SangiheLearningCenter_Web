@@ -16,10 +16,8 @@ class ProgramController extends Controller
         $programs = Program::all();
         // $programs = Program::with('pengajar', 'peserta', 'processing')->get();
         return Inertia::render('Program/Index', ['programs' => $programs]);
-<<<<<<< HEAD
         // return response()->json($programs); 
-=======
->>>>>>> 2a41908 (database seeder)
+        // return response()->json($programs); 
         // return Inertia::render('Dashboard', ['programs' => $programs]);
     }
 

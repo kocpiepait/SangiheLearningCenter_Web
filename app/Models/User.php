@@ -2,21 +2,14 @@
 
 namespace App\Models;
 
-<<<<<<< HEAD
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-=======
 use Illuminate\Contracts\Auth\MustVerifyEmail;
->>>>>>> 2a41908 (database seeder)
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-<<<<<<< HEAD
-class User extends Authenticatable
-=======
+
 class User extends Authenticatable implements MustverifyEmail
->>>>>>> 2a41908 (database seeder)
 {
     use HasApiTokens, HasFactory, Notifiable;
 
