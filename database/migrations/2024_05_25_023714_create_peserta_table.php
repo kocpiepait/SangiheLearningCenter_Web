@@ -13,11 +13,19 @@ return new class extends Migration
     {
         Schema::create('peserta', function (Blueprint $table) {
             $table->id('id_peserta');
+            $table->unsignedBigInteger('id_program')->nullable();
+            $table->foreign('id_program')
+                    ->references('id_program')
+                    ->on('program')
+                    ->onDelete('cascade')
+                    ->onUpdate('cascade');
+            $table->unsignedBigInteger('id_pengajar')->nullable();
+            $table->foreign('id_pengajar')
+                    ->references('id_pengajar')
+                    ->on('pengajar')
+                    ->onDelete('cascade')
+                    ->onUpdate('cascade');
             $table->string('nama_peserta');
-            $table->unsignedBigInteger('id_program');
-            $table->foreign('id_program')->references('id_program')->on('program')
-            ->cascadeOnDelete()
-            ->cascadeOnUpdate();
             $table->integer('usia_peserta');
             $table->string('alamat');
             $table->string('jenis_kelamin');

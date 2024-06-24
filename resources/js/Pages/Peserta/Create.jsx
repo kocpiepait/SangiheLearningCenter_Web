@@ -1,127 +1,163 @@
 import React, { useState } from "react";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Inertia } from "@inertiajs/inertia";
-import { InertiaLink } from "@inertiajs/inertia-react"; // Pastikan import InertiaLink
-import { Table } from "react-bootstrap";
+import { useForm, Head, Link } from "@inertiajs/react";
+import { Form, Button, Alert } from "react-bootstrap";
 
-const Create = ({ programs }) => {
-    const [values, setValues] = useState({
-        nama_peserta: "",
-        id_program: "",
-        usia_peserta: "",
-        alamat: "",
-        jenis_kelamin: "",
-        TTL: "",
-    });
+const CreatePeserta = ({ auth, programs, errors }) => {
+  const { data, setData, post } = useForm({
+    nama_peserta: "",
+    jenis_kelamin: "",
+    alamat: "",
+    TTL: "", // data TTL diinisialisasi dengan string kosong
+    id_program: "",
+    usia: "",
+  });
 
-    const handleChange = (e) => {
-        setValues({
-            ...values,
-            [e.target.name]:
-                e.target.type === "file" ? e.target.files[0] : e.target.value,
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    post("/peserta", {
+      onSuccess: () => {
+        setData({
+          nama_peserta: "",
+          jenis_kelamin: "",
+          alamat: "",
+          TTL: "",
+          id_program: "",
+          usia: "",
         });
-    };
+      },
+    });
+  };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const formData = new FormData();
-        formData.append("nama_peserta", values.nama_peserta);
-        formData.append("id_program", values.id_program);
-        formData.append("usia_peserta", values.usia_peserta);
-        formData.append("alamat", values.alamat);
-        formData.append("jenis_kelamin", values.jenis_kelamin);
-        formData.append("TTL", values.TTL);
+  const calculateAge = (birthdate) => {
+    const today = new Date();
+    const birthDate = new Date(birthdate);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
 
-        // Inertia.post("/pengajar", formData);
-        Inertia.post(route("peserta.store"), formData);
-    };
+  const handleDateChange = (e) => {
+    const rawDate = e.target.value; // tangkap tanggal dalam format yyyy-mm-dd
+    const [year, month, day] = rawDate.split("-"); // pisahkan tanggal menjadi tahun, bulan, dan hari
+    const formattedDate = `${day}/${month}/${year}`; // gabungkan kembali dengan format dd/mm/yyyy
+    setData("TTL", formattedDate); // set data TTL dengan tanggal yang sudah diformat
+    const age = calculateAge(rawDate); // hitung usia berdasarkan tanggal lahir
+    setData("usia", age.toString()); // set data usia sebagai string usia yang dihitung
+  };
 
-    return (
-        <div className="container mt-5">
-            <h1>Tambah Peserta</h1>
-            <InertiaLink
-                href={route("peserta.index")}
-                className="btn btn-secondary"
-            >
-                {" "}
-                kembali{" "}
-            </InertiaLink>
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label>Nama Peserta</label>
-                    <input
-                        type="text"
-                        name="nama_peserta"
-                        placeholder="Masukan nama peserta"
-                        value={values.nama_peserta}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label>Program</label>
-                    <select
-                        name="id_program"
-                        value={values.id_program}
-                        onChange={handleChange}
-                        required
-                    >
-                        {programs.map((program) => (
-                            <option
-                                key={program.id_program}
-                                value={program.id_program}
-                            >
-                                {program.nama_program}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="form-group">
-                    <label>Usia Peserta</label>
-                    <input
-                        type="text"
-                        name="usia_peserta"
-                        placeholder="Masukan usia peserta"
-                        value={values.usia_peserta}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label>Alamat</label>
-                    <input
-                        type="text"
-                        name="alamat"
-                        placeholder="Masukan alamat yang benar"
-                        value={values.alamat}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label>Jenis Kelamin</label>
-                    <input
-                        type="text"
-                        name="jenis_kelamin"
-                        placeholder="Masukan jenis kelamin"
-                        value={values.jenis_kelamin}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label>TTL</label>
-                    <input
-                        type="date"
-                        name="TTL"
-                        value={values.TTL}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-                <button type="submit">Tambah</button>
-            </form>
+  return (
+    <AuthenticatedLayout
+      user={auth.user}
+      header={
+        <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+          Tambah Peserta
+        </h2>
+      }
+    >
+      <Head title="Tambah Peserta" />
+
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div className="p-6 text-black dark:text-gray-100">
+              {Object.keys(errors).length > 0 && (
+                <Alert variant="danger">
+                  {Object.values(errors).map((error, index) => (
+                    <div key={index}>{error}</div>
+                  ))}
+                </Alert>
+              )}
+              <Form onSubmit={handleSubmit}>
+                <Form.Group controlId="nama_peserta">
+                  <Form.Label>Nama Peserta</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={data.nama_peserta}
+                    onChange={(e) => setData("nama_peserta", e.target.value)}
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="jenis_kelamin">
+                  <Form.Label>Jenis Kelamin</Form.Label>
+                  <Form.Control
+                    as="select"
+                    value={data.jenis_kelamin}
+                    onChange={(e) => setData("jenis_kelamin", e.target.value)}
+                  >
+                    <option value="">Pilih Jenis Kelamin</option>
+                    <option value="L">Laki-laki</option>
+                    <option value="P">Perempuan</option>
+                  </Form.Control>
+                </Form.Group>
+
+                <Form.Group controlId="alamat">
+                  <Form.Label>Alamat</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    value={data.alamat}
+                    onChange={(e) => setData("alamat", e.target.value)}
+                    rows={3}
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="TTL">
+                  <Form.Label>Tanggal Lahir</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={data.TTL}
+                    onChange={(e) => setData("TTL", e.target.value)}
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="usia_peserta">
+                  <Form.Label>Usia Peserta</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={data.usia_peserta}
+                    onChange={(e) => setData("usia_peserta", e.target.value)}
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="id_program">
+                  <Form.Label>Nama Program</Form.Label>
+                  <Form.Control
+                    as="select"
+                    value={data.id_program}
+                    onChange={(e) => setData("id_program", e.target.value)}
+                  >
+                    <option value="">Pilih Program</option>
+                    {programs.map((program) => (
+                      <option
+                        key={program.id_program}
+                        value={program.id_program}
+                      >
+                        {program.nama_program}
+                      </option>
+                    ))}
+                  </Form.Control>
+                </Form.Group>
+
+                <Button type="submit" className="mt-4">
+                  Simpan
+                </Button>
+                <Link
+                  href="/peserta"
+                  className="btn btn-secondary mb-3 mt-4 ml-2"
+                >
+                  Kembali
+                </Link>
+              </Form>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+    </AuthenticatedLayout>
+  );
 };
 
-export default Create;
+export default CreatePeserta;

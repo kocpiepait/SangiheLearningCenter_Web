@@ -18,11 +18,15 @@ class User extends Authenticatable implements MustverifyEmail
      *
      * @var array<int, string>
      */
+
+    protected $primaryKey = 'id';
     protected $fillable = [
         'name',
         'username',
         'email',
         'password',
+        'isAdmin',
+        'hasVerifiedEmail',
     ];
 
     /**
@@ -43,5 +47,17 @@ class User extends Authenticatable implements MustverifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'isAdmin' => 'boolean',
+        'hasVerifiedEmail' => 'boolean',
     ];
+
+     /**
+     * Determine if the user is an admin.
+     *
+     * @return bool
+     */
+    public function isAdmin()
+    {
+        return $this->isAdmin; // Assuming 'role' is a field in your users table
+    }
 }

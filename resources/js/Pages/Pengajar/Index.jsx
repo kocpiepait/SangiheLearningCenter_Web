@@ -1,151 +1,161 @@
-import React from "react";
-import { InertiaLink } from "@inertiajs/inertia-react";
+import React, { useState } from "react";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Inertia } from "@inertiajs/inertia";
-import { Table } from "react-bootstrap";
+import { Link, Head, router } from "@inertiajs/react";
+import { Table, Button, Modal } from "react-bootstrap";
 
-const Index = ({ pengajars }) => {
-    // const { csrfToken } = usePage().props;
+const Index = ({ auth, pengajars }) => {
+  console.log(pengajars);
+  const [showModal, setShowModal] = useState(false);
+  const [modalContent, setModalContent] = useState("");
+  const [isImage, setIsImage] = useState(false);
 
-    const handleDelete = (id_pengajar) => {
-        if (confirm("Apakah anda yakin akan menghapus pengajar?")) {
-            // Inertia.delete(`/pengajar/${id_pengajar}`, {
-            //     headers: {
-            //         "X-CSRF-TOKEN": csrfToken,
-            //     },
-            //     onSuccess: () => {
-            //         // Refresh halaman setelah penghapusan berhasil
-            //         window.location.reload();
-            //     },
-            //     onError: (errors) => {
-            //         console.error("Gagal menghapus pengajar", errors);
-            //     },
-            // });
+  // const handleDelete = (id_pengajar) => {
+  //   if (confirm("Apakah anda yakin akan menghapus pengajar?")) {
+  //     Inertia.delete(`/pengajars/${id_pengajar}`);
+  //   }
+  // };
 
-            Inertia.delete(route("pengajar.destroy", id_pengajar));
-        }
-    };
-    return (
-        <div className="container mt-5">
-            <h1>Pengajar</h1>
-            <InertiaLink
-                href="/pengajar/create"
-                className="btn btn-primary mb-3"
-            >
-                Tambah Pengajar
-            </InertiaLink>
-            <Table striped bordered hover>
+  const deletePengajar = (pengajar) => {
+    if (!window.confirm("Apakah anda yakin ingin menghapus program ?")) {
+      return;
+    }
+    router.delete(route("pengajars.destroy", pengajar.id_pengajar));
+  };
+
+  const handleShowModal = (content, isImage = false) => {
+    setModalContent(content);
+    setIsImage(isImage);
+    setShowModal(true);
+  };
+
+  return (
+    <AuthenticatedLayout
+      user={auth.user}
+      header={
+        <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+          Pengajar
+        </h2>
+      }
+    >
+      <Head title="Pengajar" />
+
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <Link href="/pengajars/create" className="btn btn-primary mb-3">
+            Tambah Pengajar
+          </Link>
+          <div className="overflow-x-auto bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div className="p-6 text-black dark:text-gray-100">
+              <Table striped bordered hover>
                 <thead>
-                    <tr>
-                        <th>Nama</th>
-                        <th>Program</th>
-                        <th>Foto</th>
-                        <th>Actions</th>
-                    </tr>
+                  <tr>
+                    <th>No</th>
+                    <th className="text-nowrap">Foto Pengajar</th>
+                    <th>Nama Pengajar</th>
+                    <th>Status</th>
+                    <th>Pengalaman</th>
+                    <th className="text-nowrap">Nama Program</th>
+                    <th>Peserta</th>
+                    <th>Aksi</th>
+                  </tr>
                 </thead>
                 <tbody>
-                    {pengajars.map((pengajar) => (
-                        <tr key={pengajar.id_pengajar}>
-                            <td>{pengajar.nama_pengajar}</td>
-                            <td>{pengajar.program.nama_program}</td>
-                            <td>
-                                <img
-                                    src={`/storage/${pengajar.foto_pengajar}`}
-                                    alt={pengajar.nama_pengajar}
-                                    width="50"
-                                />
-                            </td>
-                            <td>
-                                <InertiaLink
-                                    // href={route(
-                                    //     "pengajar.edit",
-                                    //     pengajar.id_pengajar
-                                    // )}
-                                    href={`/pengajar/${pengajar.id_pengajar}/edit`}
-                                    className="btn btn-warning"
-                                >
-                                    Edit
-                                </InertiaLink>
-                                <button
-                                    className="btn btn-danger"
-                                    onClick={() =>
-                                        handleDelete(pengajar.id_pengajar)
-                                    }
-                                >
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
+                  {pengajars &&
+                    pengajars.data &&
+                    pengajars.data.map((pengajar, index) => (
+                      <tr key={index}>
+                        <td>{pengajar.id_pengajar}</td>
+                        <td>
+                          <img
+                            src={pengajar.foto_pengajar}
+                            alt={pengajar.nama_pengajar}
+                            width="50"
+                            className="cursor-pointer"
+                            onClick={() =>
+                              handleShowModal(pengajar.foto_pengajar, true)
+                            }
+                          />
+                        </td>
+                        <td
+                          className="truncate max-w-xs cursor-pointer"
+                          onClick={() =>
+                            handleShowModal(pengajar.nama_pengajar)
+                          }
+                        >
+                          {pengajar.nama_pengajar}
+                        </td>
+                        <td>{pengajar.status}</td>
+                        <td
+                          className="truncate max-w-xs cursor-pointer"
+                          onClick={() => handleShowModal(pengajar.pengalaman)}
+                        >
+                          {pengajar.pengalaman}
+                        </td>
+                        <td className="text-nowrap">
+                          {pengajar.programs.length > 0 ? (
+                            <Button
+                              variant="link"
+                              onClick={() =>
+                                handleShowModal(
+                                  pengajar.programs.map(
+                                    (program) => program.nama_program + ", "
+                                  )
+                                )
+                              }
+                            >
+                              Lihat Program
+                            </Button>
+                          ) : (
+                            "Tidak ada program"
+                          )}
+                        </td>
+                        <td>{pengajar.pesertas && pengajar.pesertas.length}</td>
+                        <td>
+                          <div className="flex flex-nowrap">
+                            <Link
+                              href={`/pengajars/${pengajar.id_pengajar}/edit`}
+                              className="btn btn-warning btn-sm mr-2"
+                            >
+                              Edit
+                            </Link>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={(e) => deletePengajar(pengajar)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
                     ))}
                 </tbody>
-            </Table>
+              </Table>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Detail</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {isImage ? (
+            <img src={modalContent} alt="Pengajar" className="w-full" />
+          ) : (
+            <p>{modalContent}</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </AuthenticatedLayout>
+  );
 };
 
 export default Index;
-
-// import React from "react";
-// // import { InertiaLink, usePage } from "@inertiajs/inertia-react";
-// import { Inertia } from "@inertiajs/inertia";
-// import { Link } from "@inertiajs/inertia-react";
-// import { Table, Button } from "react-bootstrap";
-
-// const Index = ({ pengajars }) => {
-//     const handleDelete = (id_pengajar) => {
-//         if (confirm("Apakah anda yakin akan menghapus program?")) {
-//             Inertia.delete(`/pengajar/${id_pengajar}`);
-//         }
-//     };
-
-//     return (
-//         <div className="container mt-5">
-//             <h1>Pengajar</h1>
-//             <Link href="/pengajar/create" className="btn btn-primary mb-3">
-//                 Tambah Pengajar
-//             </Link>
-//             <Table striped bordered hover>
-//                 <thead>
-//                     <tr>
-//                         <th>No</th>
-//                         <th>Nama Pengajar</th>
-//                         <th>Id Program</th>
-//                         <th>Foto Pengajar</th>
-//                         <th>Nama Program</th>
-//                         <th>Aksi</th>
-//                     </tr>
-//                 </thead>
-//                 <tbody>
-//                     {pengajars.map((pengajar, index) => (
-//                         <tr key={pengajar.id_pengajar}>
-//                             <td>{index + 1}</td>
-//                             <td>{pengajar.nama_pengajar}</td>
-//                             <td>{pengajar.id_program}</td>
-//                             <td>{pengajar.foto_pengajar}</td>
-//                             {pengajar.nama_pengajar} -{" "}
-//                             {pengajar.program.nama_program}
-//                             <td>
-//                                 <Link
-//                                     href={`/pengajar/${pengajar.id_pengajar}/edit`}
-//                                     className="btn btn-warning btn-sm mr-2"
-//                                 >
-//                                     Edit
-//                                 </Link>
-//                                 <Button
-//                                     variant="danger"
-//                                     size="sm"
-//                                     onClick={() =>
-//                                         handleDelete(pengajar.id_pengajar)
-//                                     }
-//                                 >
-//                                     Delete
-//                                 </Button>
-//                             </td>
-//                         </tr>
-//                     ))}
-//                 </tbody>
-//             </Table>
-//         </div>
-//     );
-// };
-
-// export default Index;

@@ -1,71 +1,90 @@
 import React from "react";
-import { InertiaLink } from "@inertiajs/inertia-react";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+// import { InertiaLink, usePage } from "@inertiajs/inertia-react";
 import { Inertia } from "@inertiajs/inertia";
-import { Table } from "react-bootstrap";
+import { Link } from "@inertiajs/inertia-react";
+import { Table, Button } from "react-bootstrap";
+import { Head } from "@inertiajs/react";
 
-const Index = ({ beritas }) => {
-    // const { csrfToken } = usePage().props;
+const Index = ({ auth, beritas }) => {
+  // const { csrfToken } = usePage().props;
 
-    const handleDelete = (id) => {
-        if (confirm("Apakah anda yakin akan menghapus pengajar?")) {
-            Inertia.delete(route("berita.destroy", id));
-        }
-    };
-    return (
-        <div className="container mt-5">
-            <h1>Berita</h1>
-            <InertiaLink href="/berita/create" className="btn btn-primary mb-3">
-                Tambah Berita
-            </InertiaLink>
-            <Table striped bordered hover>
+  const handleDelete = (id) => {
+    if (confirm("Apakah anda yakin akan menghapus pengajar?")) {
+      Inertia.delete(route("berita.destroy", id));
+    }
+  };
+  return (
+    <AuthenticatedLayout
+      user={auth.user}
+      header={
+        <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+          Berita
+        </h2>
+      }
+    >
+      <Head title="Program" />
+
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <Link href="/pengajar/create" className="btn btn-primary mb-3">
+            Tambah Berita
+          </Link>
+          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div className="p-6 text-black dark:text-gray-100">
+              <Table striped bordered hover>
                 <thead>
-                    <tr>
-                        <th>Headline Berita</th>
-                        <th>Isi Berita</th>
-                        <th>Tanggal Publikasi</th>
-                        <th>Corresponden</th>
-                        <th>Media</th>
-                        <th>Actions</th>
-                    </tr>
+                  <tr>
+                    <th>Headline Berita</th>
+                    <th>Isi Berita</th>
+                    <th>Tanggal Publikasi</th>
+                    <th>Corresponden</th>
+                    <th>Media</th>
+                    <th>Actions</th>
+                  </tr>
                 </thead>
                 <tbody>
-                    {beritas.map((berita) => (
-                        <tr key={berita.id}>
-                            <td>{berita.headline_berita}</td>
-                            <td>{berita.isi_berita}</td>
-                            <td>{berita.tanggal_publikasi}</td>
-                            <td>{berita.corresponden}</td>
-                            <td>
-                                <img
-                                    src={`/storage/${berita.media}`}
-                                    alt={berita.headline_berita}
-                                    width="50"
-                                />
-                            </td>
-                            <td>
-                                <InertiaLink
-                                    // href={route(
-                                    //     "pengajar.edit",
-                                    //     pengajar.id_pengajar
-                                    // )}
-                                    href={`/berita/${berita.id}/edit`}
-                                    className="btn btn-warning"
-                                >
-                                    Edit
-                                </InertiaLink>
-                                <button
-                                    className="btn btn-danger"
-                                    onClick={() => handleDelete(berita.id)}
-                                >
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
+                  {beritas.map((berita) => (
+                    <tr key={berita.id}>
+                      <td>{berita.headline_berita}</td>
+                      <td>{berita.isi_berita}</td>
+                      <td>{berita.tanggal_publikasi}</td>
+                      <td>{berita.corresponden}</td>
+                      <td>
+                        <img
+                          src={`/storage/${berita.media}`}
+                          alt={berita.headline_berita}
+                          width="50"
+                        />
+                      </td>
+                      <td>
+                        <Link
+                          // href={route(
+                          //     "pengajar.edit",
+                          //     pengajar.id_pengajar
+                          // )}
+                          href={`/berita/${berita.id}/edit`}
+                          className="btn btn-warning"
+                        >
+                          Edit
+                        </Link>
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => handleDelete(berita.id)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
-            </Table>
+              </Table>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+    </AuthenticatedLayout>
+  );
 };
 
 export default Index;

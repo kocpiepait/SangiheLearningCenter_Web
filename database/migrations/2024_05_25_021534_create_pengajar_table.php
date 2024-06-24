@@ -14,13 +14,10 @@ return new class extends Migration
         Schema::create('pengajar', function (Blueprint $table) {
             $table->id('id_pengajar');
             $table->string('nama_pengajar');
-            $table->unsignedBigInteger('id_program');
-            $table->foreign('id_program')->references('id_program')->on('program')
-            ->cascadeOnDelete()
-            ->cascadeOnUpdate();
             $table->string('foto_pengajar')->nullable();
-
-           
+            $table->string('pengalaman', 2000)->nullable();
+            $table->string('status');
+            $table->timestamps();
         });
     }
 

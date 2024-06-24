@@ -5,191 +5,115 @@ namespace App\Http\Controllers;
 use App\Models\Pengajar;
 use App\Models\Program;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage; // Import class Storage untuk mengelola penyimpanan file
 use Inertia\Inertia;
 
 class PengajarController extends Controller
 {
+    // Display a listing of the resource
     public function index()
     {
-        $pengajars = Pengajar::with('program')->get();
+        $pengajars = Pengajar::with('programs', 'pesertas')->paginate(11);
         return Inertia::render('Pengajar/Index', ['pengajars' => $pengajars]);
-        // return Inertia::render('Dashboard', ['pengajars' => $pengajars]);
     }
 
+    // Show the form for creating a new resource
     public function create()
     {
         $programs = Program::all();
         return Inertia::render('Pengajar/Create', ['programs' => $programs]);
     }
 
+    // Store a newly created resource in storage
     public function store(Request $request)
     {
         $request->validate([
-            'nama_pengajar' => 'required',
-            'id_program' => 'required|exists:program,id_program',
-            'foto_pengajar' => 'nullable|file|mimes:jpg,png,jpeg',
+            'nama_pengajar' => 'required|string|max:255',
+            'foto_pengajar' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'pengalaman' => 'required|string|max:2000',
+            'status' => 'required|string|max:255',
+            'id_program' => 'nullable|array',
         ]);
 
-        $fotoPath = $request->file('foto_pengajar')->store('fotos', 'public');
+        $imageName = time() . '.' . $request->foto_pengajar->extension();
+        $request->foto_pengajar->move(public_path('images'), $imageName);
 
-        Pengajar::create([
+        $pengajar = Pengajar::create([
             'nama_pengajar' => $request->nama_pengajar,
-            'id_program' => $request->id_program,
-            'foto_pengajar' => $fotoPath
+            'foto_pengajar' => '/images/' . $imageName,
+            'pengalaman' => $request->pengalaman,
+            'status' => $request->status,
         ]);
 
-        return redirect()->to('pengajar');
+        if (isset($validatedData['programs'])) {
+            foreach ($validatedData['programs'] as $programData) {
+                $program = new Program([
+                    'nama_program' => $programData['nama_program'],
+                ]);
+                $pengajar->programs()->save($program);
+            }
+        }
+        return redirect()->route('pengajars.index')->with('success', 'Pengajar berhasil ditambahkan.');
     }
 
-    public function edit(Pengajar $pengajar)
+    // Show the form for editing the specified resource
+    public function edit($id)
     {
-        $programs = Program::all();
-        return Inertia::render('Pengajar/Edit', [
-            'pengajar' => $pengajar,
-            'programs' => $programs
-        ]);
+        $pengajar = Pengajar::with('programs')->findOrFail($id);
+    $programs = Program::all();
+
+    return inertia('Pengajar/Edit', [
+        'pengajar' => $pengajar,
+        'programs' => $programs,
+        
+    ]);
     }
 
+    // Update the specified resource in storage
     public function update(Request $request, $id)
     {
-        // \Log::info('Update method called');
-
         $request->validate([
             'nama_pengajar' => 'required|string|max:255',
-            'id_program' => 'required|exists:program,id_program',
-            'foto_pengajar' => 'nullable|file|mimes:jpg,png,jpeg',
+            'foto_pengajar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'pengalaman' => 'required|string',
+            'status' => 'required|string|max:255',
+            'id_program' => 'nullable|array',
         ]);
 
-        // \Log::info('Validation passed');
-        
         $pengajar = Pengajar::findOrFail($id);
 
-        $pengajar->nama_pengajar = $request->input('nama_pengajar');
-        $pengajar->id_program = $request->input('id_program');
-
         if ($request->hasFile('foto_pengajar')) {
-            // Hapus foto lama jika ada
-            if ($pengajar->foto_pengajar) {
-                // \Log::info('Deleting old photo: ' . $pengajar->foto_pengajar);
-                Storage::disk('public')->delete($pengajar->foto_pengajar);
-            }
-            // Simpan foto baru
-            
-            $filePath = $request->file('foto_pengajar')->store('fotos', 'public');
-            $pengajar->update(['foto_pengajar' => $filePath]);
-            // \Log::info('New photo saved: ' . $fotoPath);
+            $imageName = time() . '.' . $request->foto_pengajar->extension();
+            $request->foto_pengajar->move(public_path('images'), $imageName);
+            $pengajar->foto_pengajar = '/images/' . $imageName;
         }
 
-        // if ($request->hasFile('foto_pengajar')) {
-        //     $fotoPath = $request->file('foto_pengajar')->store('fotos', 'public');
-        //     $pengajar->update(['foto_pengajar' => $fotoPath]);
-        // }
-    
-        $pengajar->save();
-        // \Log::info('Pengajar saved');
+        $pengajar->update([
+            'nama_pengajar' => $request->nama_pengajar,
+            'pengalaman' => $request->pengalaman,
+            'status' => $request->status,
+        ]);
 
-        // // $pengajar->update($request->only('nama_pengajar', 'id_program'));
-
-        return redirect()->route('pengajar.index')->with('success', 'Pengajar updated successfully.');
+       // Tidak perlu memanggil sync() untuk relasi hasMany, cukup update program-program yang terkait
+    foreach ($pengajar->programs as $program) {
+        // Lakukan update id_pengajar di setiap program yang terkait
+        if (!in_array($program->id_program, $request->id_programs)) {
+            $program->update(['id_pengajar' => null]);
+        }
     }
 
+    foreach ($request->id_programs as $id_program) {
+        Program::where('id_program', $id_program)->update(['id_pengajar' => $pengajar->id_pengajar]);
+    }
+
+        return redirect()->route('pengajars.index')->with('success', 'Pengajar berhasil diperbarui.');
+    }
+
+    // Remove the specified resource from storage
     public function destroy(Pengajar $pengajar)
     {
-        // try {
-        //     $pengajar = Pengajar::findOrFail($id);
-
-        //     // Hapus foto pengajar dari penyimpanan jika ada
-        //     if ($pengajar->foto_pengajar) {
-        //         Storage::disk('public')->delete($pengajar->foto_pengajar);
-        //     }
-
-        //     $pengajar->delete();
-
-        //     return redirect()->route('pengajar.index')->with('success', 'Pengajar berhasil dihapus.');
-        // } catch (\Exception $e) {
-        //     // Tangani kesalahan jika pengajar tidak ditemukan atau kesalahan lainnya
-        //     return redirect()->route('pengajar.index')->with('error', 'Gagal menghapus pengajar.');
-        // }
-    
-
-
-        // $pengajar = Pengajar::findOrFail($id);
-        // $pengajar->delete();
-
-        // return redirect()->route('pengajar.index');
-        
+        $nama_pengajar = $pengajar->nama_pengajar; 
         $pengajar->delete();
-        return redirect()->route('pengajar.index')->with('success', 'Foto berhasil dihapus.');
+    return to_route('pengajars.index')
+            ->with('success', 'Program \"$nama_pengajar\" deleted successfully.'); 
     }
-
-
-
-
-     // public function index()
-    // {
-    //     $pengajars = Pengajar::with('program')->get();
-    //     return Inertia::render('Pengajar/Index', ['pengajars' => $pengajars]);
-    // }
-
-    // public function create()
-    // {
-    //     $programs = Program::all();
-    //     return Inertia::render('Pengajar/Create', ['programs' => $programs]);
-    // }
-
-    // public function store(Request $request)
-    // {
-    //     $request->validate([
-    //         'nama_pengajar' => 'required|string|max:255',
-    //         'id_program' => 'required|exists:programs,id_program',
-    //         'foto_pengajar' => 'required|string',
-    //     ]);
-
-    //     Pengajar::create($request->all());
-
-    //     return redirect()->route('pengajar.index');
-    // }
-
-    // public function edit($id)
-    // {
-    //     $pengajar = Pengajar::findOrFail($id);
-    //     $programs = Program::all();
-    //     return Inertia::render('Pengajar/Edit', [
-    //         'pengajar' => $pengajar,
-    //         'programs' => $programs,
-    //     ]);
-    // }
-
-    // public function update(Request $request, $id)
-    // {
-    //     $request->validate([
-    //         'nama_pengajar' => 'required|string|max:255',
-    //         'id_program' => 'required|exists:program,id_program',
-    //         'foto_pengajar' => 'nullable|file|mimes:jpg,png,jpeg',
-    //     ]);
-
-    //     $pengajar = Pengajar::findOrFail($id);
-
-    //     $pengajar->nama_pengajar = $request->input('nama_pengajar');
-    //     $pengajar->id_program = $request->input('id_program');
-
-    //     if ($request->hasFile('foto_pengajar')) {
-    //         $filePath = $request->file('foto_pengajar')->store('fotos', 'public');
-    //         $pengajar->update(['foto_pengajar' => $filePath]);
-    //     }
-
-    //     $pengajar->save();
-
-    //     return redirect()->route('pengajar.index');
-    // }
-
-    // public function destroy($id)
-    // {
-    //     $pengajar = Pengajar::findOrFail($id);
-    //     $pengajar->delete();
-
-    //     return redirect()->route('pengajar.index');
-    // }
-
 }

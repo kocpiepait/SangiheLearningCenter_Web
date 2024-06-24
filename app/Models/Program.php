@@ -11,16 +11,23 @@ class Program extends Model
 
     protected $primaryKey = 'id_program';
 
-    protected $fillable = ['nama_program', 'detail_program'];
+    protected $fillable = [
+        'nama_program',
+        'deskripsi',
+        'img_program',
+        'lesson',
+        'id_pengajar'
+        
+    ];
 
-    public function pengajars()
+    public function pengajar()
     {
-        return $this->hasMany(Pengajar::class, 'id_program');
+        return $this->belongsTo(Pengajar::class, 'id_pengajar', 'id_pengajar');
     }
 
     public function pesertas()
     {
-        return $this->hasMany(Peserta::class, 'id_program');
+        return $this->hasMany(Peserta::class, 'id_program','id_program');
     }
     protected $table = 'program';
     public $timestamps = false;

@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('berita', function (Blueprint $table) {
-            $table->string('media')->nullable()->change();
         });
     }
 
@@ -22,7 +21,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('beritas', function (Blueprint $table) {
-            $table->string('media')->nullable(false)->change();
         });
     }
 };

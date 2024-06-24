@@ -22,17 +22,6 @@ export default function AdminDashboard({ auth }) {
                             You're logged in!
                         </div>
                     </div>
-                    <div>
-                        <Link href="/berita" className="btn btn-primary">
-                            Berita
-                        </Link>
-                        <Link href="/galery" className="btn btn-primary">
-                            Galery
-                        </Link>
-                        <Link href="/testimoni" className="btn btn-primary">
-                            Testimoni
-                        </Link>
-                    </div>
                 </div>
             </div>
         </AuthenticatedLayout>

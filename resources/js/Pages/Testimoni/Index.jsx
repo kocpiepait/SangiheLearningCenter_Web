@@ -1,72 +1,78 @@
 import React from "react";
-import { InertiaLink } from "@inertiajs/inertia-react";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+// import { InertiaLink, usePage } from "@inertiajs/inertia-react";
 import { Inertia } from "@inertiajs/inertia";
-import { Table } from "react-bootstrap";
+import { Link } from "@inertiajs/inertia-react";
+import { Table, Button } from "react-bootstrap";
+import { Head } from "@inertiajs/react";
 
-const Index = ({ testimonis }) => {
-    // const { csrfToken } = usePage().props;
+const Index = ({ auth, testimonis }) => {
+  console.log(testimonis);
+  const handleDelete = (id_program) => {
+    if (confirm("Apakah anda yakin akan menghapus program?")) {
+      Inertia.delete(`/program/${id_program}`);
+    }
+  };
 
-    const handleDelete = (id) => {
-        if (confirm("Apakah anda yakin akan menghapus pengajar?")) {
-            Inertia.delete(route("testimoni.destroy", id));
-        }
-    };
-    return (
-        <div className="container mt-5">
-            <h1>Testimoni</h1>
-            <InertiaLink
-                href="/testimoni/create"
-                className="btn btn-primary mb-3"
-            >
-                Tambah Testimoni
-            </InertiaLink>
-            <Table striped bordered hover>
+  return (
+    <AuthenticatedLayout
+      user={auth.user}
+      header={
+        <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+          Testimoni
+        </h2>
+      }
+    >
+      <Head title="Program" />
+
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <Link href="/pengajar/create" className="btn btn-primary mb-3">
+            Tambah Testimoni
+          </Link>
+          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div className="p-6 text-black dark:text-gray-100">
+              <Table striped bordered hover>
                 <thead>
-                    <tr>
-                        <th>Isi Testimoni</th>
-                        <th>Nama Testimoni</th>
-                        <th>Status Testimoni</th>
-                        <th>Gambar Testimoni</th>
-                        <th>Actions</th>
-                    </tr>
+                  <tr>
+                    <th>No</th>
+                    <th>Nama Testimoni</th>
+                    <th>Foto Testimoni</th>
+                    <th>Isi Testimoni</th>
+                    <th>Status Testimoni</th>
+                    <th>Aksi</th>
+                  </tr>
                 </thead>
                 <tbody>
-                    {testimonis.map((testimoni) => (
-                        <tr key={testimoni.id}>
-                            <td>{testimoni.isi_testimoni}</td>
-                            <td>{testimoni.nama_testimoni}</td>
-                            <td>{testimoni.status_testimoni}</td>
-                            <td>
-                                <img
-                                    src={`/storage/${testimoni.gambar_testimoni}`}
-                                    alt={testimoni.isi_testimoni}
-                                    width="50"
-                                />
-                            </td>
-                            <td>
-                                <InertiaLink
-                                    // href={route(
-                                    //     "pengajar.edit",
-                                    //     pengajar.id_pengajar
-                                    // )}
-                                    href={`/testimoni/${testimoni.id}/edit`}
-                                    className="btn btn-warning"
-                                >
-                                    Edit
-                                </InertiaLink>
-                                <button
-                                    className="btn btn-danger"
-                                    onClick={() => handleDelete(testimoni.id)}
-                                >
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
+                  {testimonis.map((testimoni, index) => (
+                    <tr key={index}>
+                      <td>{testimoni.id}</td>
+                      <td>{testimoni.nama_testimoni}</td>
+                      <td>{testimoni.gambar_testimoni}</td>
+                      <td>{testimoni.isi_testimoni}</td>
+                      <td>{testimoni.status_testimoni}</td>
+                      <td>
+                        <Link className="btn btn-warning btn-sm mr-2">
+                          Edit
+                        </Link>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDelete(program.id_program)}
+                        >
+                          Delete
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
-            </Table>
+              </Table>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+    </AuthenticatedLayout>
+  );
 };
 
 export default Index;

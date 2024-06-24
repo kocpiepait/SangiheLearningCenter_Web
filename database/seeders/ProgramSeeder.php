@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Program;
+use GuzzleHttp\Handler\Proxy;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -15,11 +16,6 @@ class ProgramSeeder extends Seeder
      */
     public function run(): void
     {
-        for ($i =0; $i < 10; $i++) {
-        DB::table('program')->insert([
-            'nama_program' => Str::random(10),
-            'detail_program' => Str::random(50),
-        ]);
+      Program::factory()->count(10)->create();
     }
   }
-}

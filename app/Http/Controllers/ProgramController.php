@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pengajar;
 use App\Models\Program;
+use Database\Seeders\ProgramSeeder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class ProgramController extends Controller
@@ -13,12 +16,8 @@ class ProgramController extends Controller
      */
     public function index()
     {
-        $programs = Program::all();
-        // $programs = Program::with('pengajar', 'peserta', 'processing')->get();
-        return Inertia::render('Program/Index', ['programs' => $programs]);
-        // return response()->json($programs); 
-        // return response()->json($programs); 
-        // return Inertia::render('Dashboard', ['programs' => $programs]);
+        $programs = Program::with(['pengajar', 'pesertas'])->paginate(10);
+        return Inertia::render('Programs/Index', ['programs' => $programs]);
     }
 
     /**
@@ -26,7 +25,8 @@ class ProgramController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Program/Create');
+        $pengajar = Pengajar::all();
+        return Inertia::render('Programs/Create', ['pengajar' => $pengajar]);
     }
 
     /**
@@ -35,19 +35,35 @@ class ProgramController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_program' => 'required',
-            'detail_program' => 'required',
+            'nama_program' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
+            'lesson' => 'required|string|',
+            'img_program' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'id_pengajar' => 'nullable|exists:pengajar,id_pengajar',
         ]);
-        $program = [
-            'nama_program'=>$request->nama_program,
-            'detail_program'=>$request->detail_program,
-        ];
 
+        $program = new Program();
+        $program->nama_program = $request->nama_program;
+        $program->deskripsi = $request->deskripsi;
+        $program->lesson = $request->lesson;
 
-        // Program::create($request->all($data));
-        Program::create($program);
+        if ($request->hasFile('img_program')) {
+            $imageName = time() . '.' . $request->img_program->extension();
+            $request->img_program->move(public_path('images'), $imageName);
+            $program->img_program = $imageName;
+        }
 
-        return redirect()->to('program')->with('success', 'Berhasil Menambahkan Data');
+        $program->save();
+
+        return redirect()->route('programs.index')->with('success', 'Program berhasil ditambahkan.');
+
+        // $program = [
+        //     'nama_program'=>$request->nama_program,
+        //     'detail_program'=>$request->detail_program,
+        // ];
+
+        // // Program::create($request->all($data));
+        // Program::create($program);
     }
 
     /**
@@ -61,11 +77,11 @@ class ProgramController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id_program)
+    public function edit($id_program)
     {
-        $program = Program::findOrFail($id_program);
-        // $program = Program::all();
-        return Inertia::render('Program/Edit', ['program' => $program]);
+        $program = Program::with('pengajar')->findOrFail($id_program);
+        $pengajar = Pengajar::all(); // Ambil semua data pengajar
+        return Inertia::render('Programs/Edit', ['program' => $program, 'pengajar' => $pengajar]);
         //  return Inertia::render('Program/Edit')->with ('Program', $program);
     }
 
@@ -73,28 +89,42 @@ class ProgramController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id_program)
-    {
-        $request->validate([
-            'nama_program' => 'required',
-            'detail_program' => 'required',
-        ]);
-        $program = [
-            'nama_program'=>$request->nama_program,
-            'detail_program'=>$request->detail_program,
-        ];
+{
+    $request->validate([
+        'nama_program' => 'required|string|max:255',
+        'deskripsi' => 'required|string',
+        'lesson' => 'required|string',
+        'img_program' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        'id_pengajar' => 'nullable|exists:pengajar,id_pengajar',
+        // Tambahkan validasi lainnya sesuai kebutuhan
+    ]);
 
-        $program = Program::findOrFail($id_program)->update($program);
-        // $program->update($request->all());
+    $program = Program::findOrFail($id_program);
+    $program->nama_program = $request->nama_program;
+    $program->deskripsi = $request->deskripsi;
+    $program->lesson = $request->lesson;
+    $program->id_pengajar = $request->id_pengajar;
 
-        return redirect()->to('program');
+    if ($request->hasFile('img_program')) {
+        $imageName = time() . '.' . $request->img_program->extension();
+        $request->img_program->move(public_path('images'), $imageName);
+        $program->img_program = $imageName;
     }
+
+    $program->save();
+
+    return redirect()->route('programs.index')->with('success', 'Program berhasil diperbarui.');
+}
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        Program::findOrFail($id)->delete();
-        return redirect()->to('program');
-    }
+    public function destroy(Program $program)
+{
+    $nama_program = $program->nama_program; 
+    $program->delete();
+    return to_route('programs.index')
+            ->with('success', 'Program \"$nama_program\" deleted successfully.'); 
+}
 }

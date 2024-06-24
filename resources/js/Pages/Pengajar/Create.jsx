@@ -1,151 +1,140 @@
-import React, { useState } from "react";
-import { Inertia } from "@inertiajs/inertia";
-import { InertiaLink } from "@inertiajs/inertia-react"; // Pastikan import InertiaLink
-import { Table } from "react-bootstrap";
+import React from "react";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { useForm, Head, Link } from "@inertiajs/react";
+import Select from "react-select";
+import { Form, Button, Alert } from "react-bootstrap";
 
-const Create = ({ programs }) => {
-    const [values, setValues] = useState({
-        nama_pengajar: "",
-        id_program: "",
-        foto_pengajar: null,
+const CreatePengajar = ({ auth, programs }) => {
+  const { data, setData, post, errors, reset } = useForm({
+    nama_pengajar: "",
+    foto_pengajar: null,
+    pengalaman: "",
+    status: "",
+    id_programs: [], // Inisialisasi dengan array kosong
+  });
+
+  const handleProgramChange = (selectedOptions) => {
+    const selectedProgramIds = selectedOptions.map((option) => option.value);
+    setData("id_programs", selectedProgramIds);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("nama_pengajar", data.nama_pengajar);
+    formData.append("foto_pengajar", data.foto_pengajar);
+    formData.append("pengalaman", data.pengalaman);
+    formData.append("status", data.status);
+    formData.append("id_programs", JSON.stringify(data.id_programs)); // Mengubah array menjadi JSON string
+
+    post("/pengajars", {
+      preserveScroll: true,
+      onSuccess: () => reset(),
     });
+  };
 
-    const handleChange = (e) => {
-        setValues({
-            ...values,
-            [e.target.name]:
-                e.target.type === "file" ? e.target.files[0] : e.target.value,
-        });
-    };
+  // Menyusun semua pilihan program dari data programs yang diterima
+  const programOptions = programs.map((program) => ({
+    value: program.id_program,
+    label: program.nama_program,
+  }));
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const formData = new FormData();
-        formData.append("nama_pengajar", values.nama_pengajar);
-        formData.append("id_program", values.id_program);
-        formData.append("foto_pengajar", values.foto_pengajar);
+  return (
+    <AuthenticatedLayout
+      user={auth.user}
+      header={
+        <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+          Tambah Pengajar
+        </h2>
+      }
+    >
+      <Head title="Tambah Pengajar" />
 
-        // Inertia.post("/pengajar", formData);
-        Inertia.post(route("pengajar.store"), formData);
-    };
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div className="p-6 text-black dark:text-gray-100">
+              {Object.keys(errors).length > 0 && (
+                <Alert variant="danger">
+                  {Object.values(errors).map((error, index) => (
+                    <div key={index}>{error}</div>
+                  ))}
+                </Alert>
+              )}
+              <Form onSubmit={handleSubmit}>
+                <Form.Group controlId="nama_pengajar">
+                  <Form.Label>Nama Pengajar</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={data.nama_pengajar}
+                    onChange={(e) => setData("nama_pengajar", e.target.value)}
+                  />
+                </Form.Group>
 
-    return (
-        <div className="container mt-5">
-            <h1>Tambah Pengajar</h1>
-            <InertiaLink
-                href={route("pengajar.index")}
-                className="btn btn-secondary"
-            >
-                {" "}
-                kembali{" "}
-            </InertiaLink>
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label>Nama Pengajar</label>
-                    <input
-                        type="text"
-                        name="nama_pengajar"
-                        placeholder="Masukan nama pengajar"
-                        value={values.nama_pengajar}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label>Program</label>
-                    <select
-                        name="id_program"
-                        value={values.id_program}
-                        onChange={handleChange}
-                        required
-                    >
-                        {programs.map((program) => (
-                            <option
-                                key={program.id_program}
-                                value={program.id_program}
-                            >
-                                {program.nama_program}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div>
-                    <label>Foto Pengajar</label>
-                    <input
-                        type="file"
-                        name="foto_pengajar"
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-                <button type="submit">Tambah</button>
-            </form>
+                <Form.Group controlId="foto_pengajar">
+                  <Form.Label>Foto Pengajar</Form.Label>
+                  <Form.Control
+                    type="file"
+                    onChange={(e) =>
+                      setData("foto_pengajar", e.target.files[0])
+                    }
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="pengalaman">
+                  <Form.Label>Pengalaman</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    value={data.pengalaman}
+                    onChange={(e) => setData("pengalaman", e.target.value)}
+                    rows={10}
+                    maxLength={2000}
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="status">
+                  <Form.Label>Status</Form.Label>
+                  <Form.Control
+                    as="select"
+                    value={data.status}
+                    onChange={(e) => setData("status", e.target.value)}
+                  >
+                    <option value="">Pilih Status</option>
+                    <option value="Founder">Founder</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Direktur">Direktur</option>
+                    <option value="Marketing Direktur">
+                      Marketing Direktur
+                    </option>
+                    <option value="Pengajar">Pengajar</option>
+                  </Form.Control>
+                </Form.Group>
+
+                <Form.Group controlId="id_programs">
+                  <Form.Label>Nama Program</Form.Label>
+                  <Select
+                    isMulti
+                    options={programOptions}
+                    value={programOptions.filter((option) =>
+                      data.id_programs.includes(option.value)
+                    )}
+                    onChange={handleProgramChange}
+                  />
+                </Form.Group>
+
+                <Button type="submit" className="mt-4">
+                  Tambah
+                </Button>
+                <Link href="/pengajars" className="btn btn-secondary mt-4 ml-2">
+                  Kembali
+                </Link>
+              </Form>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+    </AuthenticatedLayout>
+  );
 };
 
-export default Create;
-
-// import React, { useState } from "react";
-// import { Inertia } from "@inertiajs/inertia";
-// import { usePage } from "@inertiajs/inertia-react";
-
-// const Create = () => {
-//     const { programs } = usePage().props;
-//     const [nama_pengajar, setNamaPengajar] = useState("");
-//     const [id_program, setIdProgram] = useState("");
-//     const [foto_pengajar, setFotoPengajar] = useState("");
-
-//     const handleSubmit = (e) => {
-//         e.preventDefault();
-//         Inertia.post("/pengajar", {
-//             nama_pengajar,
-//             id_program,
-//             foto_pengajar,
-//         });
-//     };
-
-//     return (
-//         <div>
-//             <h1>Create Pengajar</h1>
-//             <form onSubmit={handleSubmit}>
-//                 <div>
-//                     <label>Name</label>
-//                     <input
-//                         type="text"
-//                         value={nama_pengajar}
-//                         onChange={(e) => setNamaPengajar(e.target.value)}
-//                     />
-//                 </div>
-//                 <div>
-//                     <label>Program</label>
-//                     <select
-//                         value={id_program}
-//                         onChange={(e) => setIdProgram(e.target.value)}
-//                     >
-//                         <option value="">Select Program</option>
-//                         {programs.map((program) => (
-//                             <option
-//                                 key={program.id_program}
-//                                 value={program.id_program}
-//                             >
-//                                 {program.nama_program}
-//                             </option>
-//                         ))}
-//                     </select>
-//                 </div>
-//                 <div>
-//                     <label>Photo</label>
-//                     <input
-//                         type="text"
-//                         value={foto_pengajar}
-//                         onChange={(e) => setFotoPengajar(e.target.value)}
-//                     />
-//                 </div>
-//                 <button type="submit">Create</button>
-//             </form>
-//         </div>
-//     );
-// };
-
-// export default Create;
+export default CreatePengajar;

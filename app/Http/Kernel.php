@@ -21,7 +21,13 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        'admin.verified' => \App\Http\Middleware\EnsureAdminIsVerified::class,
     ];
+
+    //Middleware untuk Route admin
+    // protected $routeMiddleware = [
+    //     'admin.verified' => \App\Http\Middleware\EnsureAdminIsVerified::class,
+    // ];
 
     /**
      * The application's route middleware groups.

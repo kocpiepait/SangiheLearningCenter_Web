@@ -1,153 +1,153 @@
-import React, { useState, useEffect } from "react";
-import { Inertia } from "@inertiajs/inertia";
-import { InertiaLink } from "@inertiajs/inertia-react"; // Pastikan import InertiaLink
-import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useState } from "react";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { useForm, Head, Link, usePage } from "@inertiajs/react";
+import { Form, Button, Alert } from "react-bootstrap";
 
-const Edit = ({ peserta, programs }) => {
-    console.log(programs);
-    const [values, setValues] = useState({
-        nama_peserta: peserta.nama_peserta,
-        id_program: peserta.id_program,
-        usia_peserta: peserta.usia_peserta,
-        alamat: peserta.alamat,
-        jenis_kelamin: peserta.jenis_kelamin,
-        TTL: peserta.TTL,
-    });
+const EditPeserta = ({ auth, peserta, programs, errors }) => {
+  const { data, setData, put } = useForm({
+    nama_peserta: peserta.nama_peserta ?? "",
+    jenis_kelamin: peserta.jenis_kelamin ?? "",
+    alamat: peserta.alamat ?? "",
+    TTL: peserta.TTL ?? "",
+    id_program: peserta.id_program ?? "",
+    usia_peserta: peserta.usia_peserta ?? "",
+  });
 
-    // Menggunakan useEffect untuk memperbarui state ketika props peserta berubah
-    useEffect(() => {
-        if (peserta) {
-            setValues({
-                nama_peserta: peserta.nama_peserta,
-                id_program: peserta.id_program,
-                usia_peserta: peserta.usia_peserta,
-                alamat: peserta.alamat,
-                jenis_kelamin: peserta.jenis_kelamin,
-                TTL: peserta.TTL,
-            });
-        }
-    }, [peserta]);
+  const { url } = usePage();
 
-    // const Edit = () => {
-    //     const { pengajar, programs } = usePage().props;
-    //     const [nama_pengajar, setNamaPengajar] = useState(pengajar.nama_pengajar);
-    //     const [id_program, setIdProgram] = useState(pengajar.id_program);
-    //     const [foto_pengajar, setFotoPengajar] = useState(pengajar.foto_pengajar);
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-    const handleChange = (e) => {
-        setValues({
-            ...values,
-            [e.target.name]:
-                e.target.type === "file" ? e.target.files[0] : e.target.value,
+    const formData = new FormData();
+    formData.append("nama_peserta", data.nama_peserta);
+    formData.append("jenis_kelamin", data.jenis_kelamin);
+    formData.append("alamat", data.alamat);
+    formData.append("TTL", data.TTL);
+    formData.append("usia_peserta", data.usia_peserta);
+    formData.append("id_program", data.id_program);
+
+    put(`/peserta/${peserta.id_peserta}`, formData, {
+      onSuccess: () => {
+        setData({
+          nama_peserta: "",
+          jenis_kelamin: "",
+          alamat: "",
+          TTL: "",
+          id_program: "",
+          usia_peserta: "",
         });
-    };
+      },
+    });
+  };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const formData = new FormData();
-        formData.append("nama_peserta", values.nama_peserta);
-        formData.append("id_program", values.id_program);
-        formData.append("usia_peserta", values.usia_peserta);
-        formData.append("alamat", values.alamat);
-        formData.append("jenis_kelamin", values.jenis_kelamin);
-        formData.append("TTL", values.TTL);
+  return (
+    <AuthenticatedLayout
+      user={auth.user}
+      header={
+        <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+          Edit Peserta
+        </h2>
+      }
+    >
+      <Head title="Edit Peserta" />
 
-        formData.append("_method", "PUT"); // untuk menyatakan metode PUT
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div className="p-6 text-black dark:text-gray-100">
+              {Object.keys(errors).length > 0 && (
+                <Alert variant="danger">
+                  {Object.values(errors).map((error, index) => (
+                    <div key={index}>{error}</div>
+                  ))}
+                </Alert>
+              )}
+              <Form onSubmit={handleSubmit}>
+                <Form.Group controlId="nama_peserta">
+                  <Form.Label>Nama Peserta</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={data.nama_peserta}
+                    onChange={(e) => setData("nama_peserta", e.target.value)}
+                  />
+                </Form.Group>
 
-        Inertia.post(route("peserta.update", peserta.id_peserta), formData); // metode POST untuk pembaruan inertia
-    };
-    return (
-        <div className="container">
-            <h1>Edit Peserta</h1>
-            <InertiaLink href="/peserta" className="btn btn-secondary">
-                {" "}
-                kembali{" "}
-            </InertiaLink>
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label>Nama Peserta</label>
-                    <input
-                        type="text"
-                        name="nama_peserta"
-                        // value={nama_pengajar}
-                        value={values.nama_peserta}
-                        onChange={handleChange}
-                        // onChange={(e) => setNamaPengajar(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label>Program</label>
-                    <select
-                        name="id_program"
-                        // value={id_program}
-                        value={values.id_program}
-                        onChange={handleChange}
-                        // onChange={(e) => setIdProgram(e.target.value)}
-                        required
-                    >
-                        {programs.map((program) => (
-                            <option
-                                key={program.id_program}
-                                value={program.id_program}
-                            >
-                                {program.nama_program}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="form-group">
-                    <label>Usia Peserta</label>
-                    <input
-                        type="text"
-                        name="usia_peserta"
-                        // value={nama_pengajar}
-                        value={values.usia_peserta}
-                        onChange={handleChange}
-                        // onChange={(e) => setNamaPengajar(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label>Alamat</label>
-                    <input
-                        type="text"
-                        name="alamat"
-                        // value={nama_pengajar}
-                        value={values.alamat}
-                        onChange={handleChange}
-                        // onChange={(e) => setNamaPengajar(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label>Jenis Kelamin</label>
-                    <input
-                        type="text"
-                        name="jenis_kelamin"
-                        // value={nama_pengajar}
-                        value={values.jenis_kelamin}
-                        onChange={handleChange}
-                        // onChange={(e) => setNamaPengajar(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label>TTL</label>
-                    <input
-                        type="date"
-                        name="TTL"
-                        // value={nama_pengajar}
-                        value={values.TTL}
-                        onChange={handleChange}
-                        // onChange={(e) => setNamaPengajar(e.target.value)}
-                        required
-                    />
-                </div>
-                <button type="submit">Simpan</button>
-            </form>
+                <Form.Group controlId="jenis_kelamin">
+                  <Form.Label>Jenis Kelamin</Form.Label>
+                  <Form.Control
+                    as="select"
+                    value={data.jenis_kelamin}
+                    onChange={(e) => setData("jenis_kelamin", e.target.value)}
+                  >
+                    <option value="">Pilih Jenis Kelamin</option>
+                    <option value="L">Laki-laki</option>
+                    <option value="P">Perempuan</option>
+                  </Form.Control>
+                </Form.Group>
+
+                <Form.Group controlId="alamat">
+                  <Form.Label>Alamat</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    value={data.alamat}
+                    onChange={(e) => setData("alamat", e.target.value)}
+                    rows={3}
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="TTL">
+                  <Form.Label>Tanggal Lahir</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={data.TTL}
+                    onChange={(e) => setData("TTL", e.target.value)}
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="usia_peserta">
+                  <Form.Label>Usia Peserta</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={data.usia_peserta}
+                    onChange={(e) => setData("usia_peserta", e.target.value)}
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="id_program">
+                  <Form.Label>Nama Program</Form.Label>
+                  <Form.Control
+                    as="select"
+                    value={data.id_program}
+                    onChange={(e) => setData("id_program", e.target.value)}
+                  >
+                    <option value="">Pilih Program</option>
+                    {programs.map((program) => (
+                      <option
+                        key={program.id_program}
+                        value={program.id_program}
+                      >
+                        {program.nama_program}
+                      </option>
+                    ))}
+                  </Form.Control>
+                </Form.Group>
+
+                <Button type="submit" className="mt-4">
+                  Simpan
+                </Button>
+                <Link
+                  href="/peserta"
+                  className="btn btn-secondary mb-3 mt-4 ml-2"
+                >
+                  Kembali
+                </Link>
+              </Form>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+    </AuthenticatedLayout>
+  );
 };
 
-export default Edit;
+export default EditPeserta;
