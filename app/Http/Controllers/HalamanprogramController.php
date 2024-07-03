@@ -13,7 +13,7 @@ class HalamanprogramController extends Controller
      */
     public function index()
     {
-        $programs = Program::all();
+        $programs = Program::with(['pengajar', 'pesertas'])->paginate(5);
 
         return Inertia::render('HalamanProgram', [
             'programs' => $programs,

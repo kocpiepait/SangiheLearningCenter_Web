@@ -5,6 +5,7 @@ import Select from "react-select";
 import { Form, Button, Alert } from "react-bootstrap";
 
 const CreatePengajar = ({ auth, programs }) => {
+  console.log(auth);
   const { data, setData, post, errors, reset } = useForm({
     nama_pengajar: "",
     foto_pengajar: null,

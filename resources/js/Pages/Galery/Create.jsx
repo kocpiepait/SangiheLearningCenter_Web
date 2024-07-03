@@ -1,43 +1,67 @@
 import React, { useState } from "react";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Inertia } from "@inertiajs/inertia";
-import { InertiaLink } from "@inertiajs/inertia-react";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { useForm, Head, Link } from "@inertiajs/react";
+import { Form, Button, Alert } from "react-bootstrap";
 
-const Create = () => {
-    const [foto, setFoto] = useState(null);
+const CreateGalery = ({ auth, errors }) => {
+  const { data, setData, post, reset } = useForm({
+    foto: null,
+  });
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const formData = new FormData();
-        formData.append("foto", foto);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    post("/galery", {
+      onSuccess: () => reset(),
+    });
+  };
 
-        Inertia.post(route("galery.store"), formData);
-    };
+  return (
+    <AuthenticatedLayout
+      user={auth.user}
+      header={
+        <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+          Tambah Galeri
+        </h2>
+      }
+    >
+      <Head title="Tambah Galeri" />
 
-    return (
-        <div className="container mt-5">
-            <h1>Tambah Gambar</h1>
-            <InertiaLink
-                href={route("galery.index")}
-                className="btn btn-secondary mb-3"
-            >
-                Kembali
-            </InertiaLink>
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label>Foto:</label>
-                    <input
-                        type="file"
-                        className="form-control"
-                        onChange={(e) => setFoto(e.target.files[0])}
-                    />
-                </div>
-                <button type="submit" className="btn btn-primary mt-3">
-                    Simpan
-                </button>
-            </form>
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div className="p-6 text-black dark:text-gray-100">
+              {errors && (
+                <Alert variant="danger">
+                  {Object.values(errors).map((error, index) => (
+                    <div key={index}>{error}</div>
+                  ))}
+                </Alert>
+              )}
+              <Form onSubmit={handleSubmit}>
+                <Form.Group controlId="foto">
+                  <Form.Label>Upload Foto</Form.Label>
+                  <Form.Control
+                    type="file"
+                    onChange={(e) => setData("foto", e.target.files[0])}
+                  />
+                </Form.Group>
+                <Button type="submit" className="mt-4">
+                  Simpan
+                </Button>
+                <Link
+                  href="/galery"
+                  className="btn btn-secondary mb-3 mt-4 ml-2"
+                >
+                  Kembali
+                </Link>
+              </Form>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+    </AuthenticatedLayout>
+  );
 };
 
-export default Create;
+export default CreateGalery;

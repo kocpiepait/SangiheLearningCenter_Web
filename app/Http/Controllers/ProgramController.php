@@ -56,14 +56,6 @@ class ProgramController extends Controller
         $program->save();
 
         return redirect()->route('programs.index')->with('success', 'Program berhasil ditambahkan.');
-
-        // $program = [
-        //     'nama_program'=>$request->nama_program,
-        //     'detail_program'=>$request->detail_program,
-        // ];
-
-        // // Program::create($request->all($data));
-        // Program::create($program);
     }
 
     /**

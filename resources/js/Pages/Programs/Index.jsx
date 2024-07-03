@@ -5,6 +5,7 @@ import { Table, Button, Alert, Modal } from "react-bootstrap";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 
 const Index = ({ auth, programs }) => {
+  console.log(programs);
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState("");
   const [isImage, setIsImage] = useState(false);

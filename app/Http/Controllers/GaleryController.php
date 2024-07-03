@@ -22,16 +22,17 @@ class GaleryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'foto' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $filePath = $request->file('foto')->store('images', 'public');
+        if ($request->file('foto')) {
+            // Simpan file ke storage
+            $path = $request->file('foto')->store('galery', 'public');
+            // Simpan path ke database
+            Galery::create(['foto' => $path]);
+        }
 
-        Galery::create([
-            'foto' => $filePath,
-        ]);
-
-        return redirect()->route('galery.index')->with('success', 'Gambar berhasil diunggah.');
+        return redirect()->route('galery.index')->with('success', 'Galeri berhasil ditambahkan.');
     }
 
     public function edit(Galery $galery)
@@ -39,18 +40,24 @@ class GaleryController extends Controller
         return Inertia::render('Galery/Edit', ['galery' => $galery]);
     }
 
-    public function update(Request $request, Galery $galery)
+    public function update(Request $request, Galery $id)
     {
         $request->validate([
-            'foto' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        if ($request->hasFile('foto')) {
-            $filePath = $request->file('foto')->store('images', 'public');
-            $galery->update(['foto' => $filePath]);
+        $galery = Galery::findOrFail($id);
+
+        if ($request->file('foto')) {
+            $path = $request->file('foto')->store('galery', 'public');
+            // Optional: Hapus gambar lama jika perlu
+            // Storage::disk('public')->delete($galery->foto);
+            $galery->foto = $path;
         }
 
-        return redirect()->route('galery.index')->with('success', 'Gambar berhasil diperbarui.');
+        $galery->save();
+
+        return redirect()->route('galery.index')->with('success', 'Galeri berhasil diperbarui.');
     }
 
     public function destroy(Galery $galery)

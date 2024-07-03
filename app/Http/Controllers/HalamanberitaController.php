@@ -15,7 +15,7 @@ class HalamanberitaController extends Controller
     {
         $beritas = Berita::all();
 
-        return Inertia::render('Berita', [
+        return Inertia::render('HalamanBerita', [
             'beritas' => $beritas,
         ]);
     }

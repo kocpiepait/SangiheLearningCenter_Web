@@ -1,17 +1,34 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-// import { InertiaLink, usePage } from "@inertiajs/inertia-react";
 import { Inertia } from "@inertiajs/inertia";
-import { Link } from "@inertiajs/inertia-react";
-import { Table, Button } from "react-bootstrap";
-import { Head } from "@inertiajs/react";
+import { Table, Button, Alert, Modal } from "react-bootstrap";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 
-const Index = ({ auth, testimonis }) => {
-  console.log(testimonis);
-  const handleDelete = (id_program) => {
-    if (confirm("Apakah anda yakin akan menghapus program?")) {
-      Inertia.delete(`/program/${id_program}`);
+const IndexTestimoni = ({ auth, testimonis }) => {
+  const [showModal, setShowModal] = useState(false);
+  const [modalContent, setModalContent] = useState("");
+  const [isImage, setIsImage] = useState(false);
+
+  const { props } = usePage();
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  useEffect(() => {
+    if (props.flash && props.flash.success) {
+      console.log(props.flash.success);
     }
+  }, [props.flash]);
+
+  const deleteTestimoni = (testimoni) => {
+    if (!window.confirm("Apakah anda yakin ingin menghapus testimoni ?")) {
+      return;
+    }
+    router.delete(route("testimoni.destroy", testimoni.id));
+  };
+
+  const handleShowModal = (content, isImage = false) => {
+    setModalContent(content);
+    setIsImage(isImage);
+    setShowModal(true);
   };
 
   return (
@@ -23,45 +40,87 @@ const Index = ({ auth, testimonis }) => {
         </h2>
       }
     >
-      <Head title="Program" />
+      <Head title="Testimoni" />
 
       <div className="py-12">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-          <Link href="/pengajar/create" className="btn btn-primary mb-3">
+          <Link
+            href={route("testimoni.create")}
+            className="btn btn-primary mb-3"
+          >
             Tambah Testimoni
           </Link>
-          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+
+          {successMessage && (
+            <Alert
+              variant="success"
+              onClose={() => setSuccessMessage(null)}
+              dismissible
+            >
+              {successMessage}
+            </Alert>
+          )}
+
+          <div className="overflow-x-auto bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
             <div className="p-6 text-black dark:text-gray-100">
               <Table striped bordered hover>
                 <thead>
                   <tr>
-                    <th>No</th>
-                    <th>Nama Testimoni</th>
-                    <th>Foto Testimoni</th>
-                    <th>Isi Testimoni</th>
-                    <th>Status Testimoni</th>
-                    <th>Aksi</th>
+                    <th className="w-16">No</th>
+                    <th className="w-24 text-nowrap">Foto Testimoni</th>
+                    <th className="w-48 text-nowrap">Nama Testimoni</th>
+                    <th className="w-64">Isi Testimoni</th>
+                    <th className="w-32">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {testimonis.map((testimoni, index) => (
                     <tr key={index}>
-                      <td>{testimoni.id}</td>
-                      <td>{testimoni.nama_testimoni}</td>
-                      <td>{testimoni.gambar_testimoni}</td>
-                      <td>{testimoni.isi_testimoni}</td>
-                      <td>{testimoni.status_testimoni}</td>
+                      <td>{index + 1}</td>
                       <td>
-                        <Link className="btn btn-warning btn-sm mr-2">
-                          Edit
-                        </Link>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleDelete(program.id_program)}
-                        >
-                          Delete
-                        </Button>
+                        <img
+                          src={`/images/${testimoni.gambar_testimoni}`}
+                          alt={testimoni.nama_testimoni}
+                          width="50"
+                          className="cursor-pointer"
+                          onClick={() =>
+                            handleShowModal(
+                              `/images/${testimoni.gambar_testimoni}`,
+                              true
+                            )
+                          }
+                        />
+                      </td>
+                      <td
+                        className="truncate max-w-xs cursor-pointer"
+                        onClick={() =>
+                          handleShowModal(testimoni.nama_testimoni)
+                        }
+                      >
+                        {testimoni.nama_testimoni}
+                      </td>
+                      <td
+                        className="truncate max-w-xs cursor-pointer"
+                        onClick={() => handleShowModal(testimoni.isi_testimoni)}
+                      >
+                        {testimoni.isi_testimoni}
+                      </td>
+                      <td>
+                        <div className="flex flex-row flex-nowrap">
+                          <Link
+                            href={`/testimoni/${testimoni.id}/edit`}
+                            className="btn btn-warning btn-sm mr-2"
+                          >
+                            Edit
+                          </Link>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={(e) => deleteTestimoni(testimoni)}
+                          >
+                            Delete
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -71,68 +130,26 @@ const Index = ({ auth, testimonis }) => {
           </div>
         </div>
       </div>
+
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Detail</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {isImage ? (
+            <img src={modalContent} alt="Testimoni" className="w-full" />
+          ) : (
+            <p>{modalContent}</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </AuthenticatedLayout>
   );
 };
 
-export default Index;
-
-// import React from "react";
-// import { Inertia } from "@inertiajs/inertia";
-// import { Link } from "@inertiajs/inertia-react";
-// import { Table, Button } from "react-bootstrap";
-
-// const Index = ({ testimonis }) => {
-//     const handleDelete = (id) => {
-//         if (confirm("Apakah anda yakin akan menghapus testimoni?")) {
-//             Inertia.delete(`/testimoni/${id}`);
-//         }
-//     };
-
-//     return (
-//         <div className="container mt-5">
-//             <h1>Testimoni</h1>
-//             <Link href="/testimoni/create" className="btn btn-primary mb-3">
-//                 Tambah Testimoni
-//             </Link>
-//             <Table striped bordered hover>
-//                 <thead>
-//                     <tr>
-//                         <th>No</th>
-//                         <th>Isi Testimoni</th>
-//                         <th>Nama Testimoni</th>
-//                         <th>Satus Testimoni</th>
-//                         <th>Actions</th>
-//                     </tr>
-//                 </thead>
-//                 <tbody>
-//                     {testimonis.map((testimoni, index) => (
-//                         <tr key={testimoni.id}>
-//                             <td>{index + 1}</td>
-//                             <td>{testimoni.isi_testimoni}</td>
-//                             <td>{testimoni.nama_testimoni}</td>
-//                             <td>{testimoni.status_testimoni}</td>
-//                             <td>
-//                                 <Link
-//                                     href={`/testimoni/${testimoni.id}/edit`}
-//                                     className="btn btn-warning btn-sm mr-2"
-//                                 >
-//                                     Edit
-//                                 </Link>
-//                                 <Button
-//                                     variant="danger"
-//                                     size="sm"
-//                                     onClick={() => handleDelete(testimoni.id)}
-//                                 >
-//                                     Delete
-//                                 </Button>
-//                             </td>
-//                         </tr>
-//                     ))}
-//                 </tbody>
-//             </Table>
-//         </div>
-//     );
-// };
-
-// export default Index;
+export default IndexTestimoni;

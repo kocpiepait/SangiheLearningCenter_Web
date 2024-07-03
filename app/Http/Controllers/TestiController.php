@@ -15,7 +15,7 @@ class TestiController extends Controller
     {
         $testimonis = Testimoni::all();
 
-        return Inertia::render('Testimoni', [
+        return Inertia::render('HalamanTestimoni', [
             'testimonis' => $testimonis,
         ]);
     }

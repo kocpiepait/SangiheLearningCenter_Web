@@ -44,6 +44,8 @@ Route::middleware(['auth','verified'])->group(function (){
     Route::get('/dashboard', fn() => Inertia::render('Dashboard'))
         ->name('dashboard');
     Route::resource('beritas', BeritaController::class);
+    Route::delete('/beritas/{id}', [BeritaController::class, 'destroy']);
+    Route::put('/beritas/{id}', [ProgramController::class, 'update'])->name('beritas.update');
     Route::resource('testimoni', TestimoniController::class);
     Route::resource('galery', GaleryController::class);
     Route::resource('programs', ProgramController::class);

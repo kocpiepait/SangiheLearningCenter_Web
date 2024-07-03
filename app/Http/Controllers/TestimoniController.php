@@ -26,41 +26,27 @@ class TestimoniController extends Controller
         return Inertia::render('Testimoni/Create');
     }
 
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validatedData = $request->validate([
+            'nama_testimoni' => 'required|string|max:255',
+            'gambar_testimoni' => 'required|image|max:25048',
             'isi_testimoni' => 'required|string',
-            'nama_testimoni' => 'required|string',
-            'status_testimoni' => 'required|string',
-            'gambar_testimoni' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            
-        ]); 
-        
-        $gambarPath = $request->file('gambar_testimoni') ? $request->file('gambar_testimoni')->store('fotos', 'public') : null;
-        // $gambarPath = $request->file('gambar_testimoni')->store('gambar_testimoni', 'public');
-
-        // Cek apakah ada file gambar yang diunggah
-    // if ($request->hasFile('gambar_testimoni')) {
-    //     // Simpan file gambar ke direktori penyimpanan
-    //     $gambarPath = $request->file('gambar_testimoni')->store('fotos', 'public');
-    // } else {
-    //     // Jika tidak ada file yang diunggah, set path gambar menjadi null
-    //     $gambarPath = null;
-    // }
-    
-            
-    // // Buat entri baru dalam tabel Testimoni dengan nilai gambar_testimoni yang disediakan
-        Testimoni::create([
-            'isi_testimoni' => $request->isi_testimoni,
-            'nama_testimoni' => $request->nama_testimoni,
-            'status_testimoni' => $request->status_testimoni,
-            'gambar_testimoni' => $gambarPath
+            'status_testimoni' => 'required|string|max:255',
         ]);
+        
+        if ($request->hasFile('gambar_testimoni')) {
+            $fileName = time() . '.' . $request->gambar_testimoni->extension();
+            $request->gambar_testimoni->move(public_path('images'), $fileName);
+            $validatedData['gambar_testimoni'] = $fileName;
+        }
 
-        return redirect()->to('testimoni');
+        Testimoni::create($validatedData);
+        return redirect()->route('testimoni.index')->with('success', 'Testimoni berhasil ditambahkan.');
     }
 
     /**

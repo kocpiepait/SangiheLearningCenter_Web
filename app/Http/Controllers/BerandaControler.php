@@ -19,7 +19,7 @@ class BerandaControler extends Controller
     {
 
         $pengajars = Pengajar::all();
-        $programs = Program::all();
+        $programs = Program::with('pengajar','pesertas')->get();
         $testimonis = Testimoni::all();
         $beritas = Berita::all();
 

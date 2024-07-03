@@ -1,19 +1,38 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-// import { InertiaLink, usePage } from "@inertiajs/inertia-react";
 import { Inertia } from "@inertiajs/inertia";
-import { Link } from "@inertiajs/inertia-react";
-import { Table, Button } from "react-bootstrap";
-import { Head } from "@inertiajs/react";
+import { Table, Button, Alert, Modal } from "react-bootstrap";
+import { Head, Link, router, usePage } from "@inertiajs/react";
+// Sesuaikan path sesuai struktur proyek Anda
 
 const Index = ({ auth, beritas }) => {
-  // const { csrfToken } = usePage().props;
+  console.log(beritas);
+  const [showModal, setShowModal] = useState(false);
+  const [modalContent, setModalContent] = useState("");
+  const [isImage, setIsImage] = useState(false);
 
-  const handleDelete = (id) => {
-    if (confirm("Apakah anda yakin akan menghapus pengajar?")) {
-      Inertia.delete(route("berita.destroy", id));
+  const { props } = usePage();
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  useEffect(() => {
+    if (props.flash && props.flash.success) {
+      console.log(props.flash.success);
     }
+  }, [props.flash]);
+
+  const deleteBerita = (berita) => {
+    if (!window.confirm("Apakah anda yakin ingin menghapus berita?")) {
+      return;
+    }
+    router.delete(route("beritas.destroy", berita.id));
   };
+
+  const handleShowModal = (content, isImage = false) => {
+    setModalContent(content);
+    setIsImage(isImage);
+    setShowModal(true);
+  };
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -23,57 +42,88 @@ const Index = ({ auth, beritas }) => {
         </h2>
       }
     >
-      <Head title="Program" />
+      <Head title="Berita" />
 
       <div className="py-12">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-          <Link href="/pengajar/create" className="btn btn-primary mb-3">
+          <Link href={route("beritas.create")} className="btn btn-primary mb-3">
             Tambah Berita
           </Link>
-          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+
+          {successMessage && (
+            <Alert
+              variant="success"
+              onClose={() => setSuccessMessage(null)}
+              dismissible
+            >
+              {successMessage}
+            </Alert>
+          )}
+
+          <div className="overflow-x-auto bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
             <div className="p-6 text-black dark:text-gray-100">
               <Table striped bordered hover>
                 <thead>
                   <tr>
-                    <th>Headline Berita</th>
-                    <th>Isi Berita</th>
-                    <th>Tanggal Publikasi</th>
-                    <th>Corresponden</th>
-                    <th>Media</th>
-                    <th>Actions</th>
+                    <th className="w-16">No</th>
+                    <th className="w-24 text-nowrap">Media</th>
+                    <th className="w-48 text-nowrap">Headline</th>
+                    <th className="w-64">Isi Berita</th>
+                    <th className="w-48">Tanggal Publikasi</th>
+                    <th className="w-48">Corresponden</th>
+                    <th className="w-32">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {beritas.map((berita) => (
-                    <tr key={berita.id}>
-                      <td>{berita.headline_berita}</td>
-                      <td>{berita.isi_berita}</td>
-                      <td>{berita.tanggal_publikasi}</td>
-                      <td>{berita.corresponden}</td>
+                  {beritas.map((berita, index) => (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
                       <td>
                         <img
                           src={`/storage/${berita.media}`}
                           alt={berita.headline_berita}
                           width="50"
+                          className="cursor-pointer"
+                          onClick={() =>
+                            handleShowModal(
+                              `/public/media/${berita.media}`,
+                              true
+                            )
+                          }
                         />
                       </td>
+                      <td
+                        className="truncate max-w-xs cursor-pointer"
+                        onClick={() => handleShowModal(berita.headline_berita)}
+                      >
+                        {berita.headline_berita}
+                      </td>
+                      <td
+                        className="truncate max-w-xs cursor-pointer"
+                        onClick={() => handleShowModal(berita.isi_berita)}
+                      >
+                        {berita.isi_berita}
+                      </td>
+                      <td className="text-nowrap">
+                        {berita.tanggal_publikasi}
+                      </td>
+                      <td className="text-nowrap">{berita.corresponden}</td>
                       <td>
-                        <Link
-                          // href={route(
-                          //     "pengajar.edit",
-                          //     pengajar.id_pengajar
-                          // )}
-                          href={`/berita/${berita.id}/edit`}
-                          className="btn btn-warning"
-                        >
-                          Edit
-                        </Link>
-                        <button
-                          className="btn btn-danger"
-                          onClick={() => handleDelete(berita.id)}
-                        >
-                          Delete
-                        </button>
+                        <div className="flex flex-row flex-nowrap">
+                          <Link
+                            href={`/beritas/${berita.id}/edit`}
+                            className="btn btn-warning btn-sm mr-2"
+                          >
+                            Edit
+                          </Link>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={(e) => deleteBerita(berita)}
+                          >
+                            Delete
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -83,78 +133,26 @@ const Index = ({ auth, beritas }) => {
           </div>
         </div>
       </div>
+
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Detail</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {isImage ? (
+            <img src={modalContent} alt="Berita" className="w-full" />
+          ) : (
+            <p>{modalContent}</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </AuthenticatedLayout>
   );
 };
 
 export default Index;
-
-// import React from "react";
-// import { Inertia } from "@inertiajs/inertia";
-// import { Link } from "@inertiajs/inertia-react";
-// import { Table, Button } from "react-bootstrap";
-
-// const Index = ({ beritas }) => {
-//     const handleDelete = (id) => {
-//         if (confirm("Apakah anda yakin akan menghapus berita?")) {
-//             Inertia.delete(`/berita/${id}`);
-//         }
-//     };
-
-//     return (
-//         <div className="container mt-5">
-//             <h1>Berita</h1>
-//             <Link href="/berita/create" className="btn btn-primary mb-3">
-//                 Tambah Berita
-//             </Link>
-//             <Table striped bordered hover>
-//                 <thead>
-//                     <tr>
-//                         <th>No</th>
-//                         <th>Media</th>
-//                         <th>Headline</th>
-//                         <th>Isi Berita</th>
-//                         <th>Tanggal Publikasi</th>
-//                         <th>Corresponden</th>
-//                         <th>Actions</th>
-//                     </tr>
-//                 </thead>
-//                 <tbody>
-//                     {beritas.map((berita, index) => (
-//                         <tr key={berita.id}>
-//                             <td>{index + 1}</td>
-//                             <td>
-//                                 <img
-//                                     src={`/storage/${berita.media}`}
-//                                     alt={berita.media}
-//                                     width="50"
-//                                 />
-//                             </td>
-//                             <td>{berita.headline_berita}</td>
-//                             <td>{berita.isi_berita}</td>
-//                             <td>{berita.tanggal_publikasi}</td>
-//                             <td>{berita.corresponden}</td>
-//                             <td>
-//                                 <Link
-//                                     href={`/berita/${berita.id}/edit`}
-//                                     className="btn btn-warning btn-sm mr-2"
-//                                 >
-//                                     Edit
-//                                 </Link>
-//                                 <Button
-//                                     variant="danger"
-//                                     size="sm"
-//                                     onClick={() => handleDelete(berita.id)}
-//                                 >
-//                                     Delete
-//                                 </Button>
-//                             </td>
-//                         </tr>
-//                     ))}
-//                 </tbody>
-//             </Table>
-//         </div>
-//     );
-// };
-
-// export default Index;

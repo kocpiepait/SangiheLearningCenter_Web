@@ -15,7 +15,7 @@ class HalamangaleriController extends Controller
     {
         $galeries = galery::all();
 
-        return Inertia::render('Galery', [
+        return Inertia::render('HalamanGalery', [
             'galeries' => $galeries,
         ]);
     }
